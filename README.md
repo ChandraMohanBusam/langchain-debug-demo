@@ -5,9 +5,8 @@ LangChain and LangGraph agents **without relying on paid observability tools**.
 
 Built by Chandra Mohan Busam | Principal Engineer and AI Engineer
 
-**Full Debugging Guide (PDF):** [LangChain_LangGraph_Debugging_Guide.pdf](docs/LangChain_LangGraph_Debugging_Guide.pdf)
-Covers LangChain callbacks, LangGraph state tools, observability platform comparison,
-debugging philosophy, and interview prep. Lives alongside this code as a reference document.
+**Architecture Notes:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+Design decisions and reasoning behind the three-level debugging approach, config-driven handler stack, and why LangGraph needs a different philosophy than LangChain.
 
 ---
 
@@ -35,26 +34,29 @@ debugging philosophy, and interview prep. Lives alongside this code as a referen
 langchain-debug-demo/
 │
 ├── docs/
-│   └── LangChain_LangGraph_Debugging_Guide.pdf   # Full debugging & observability guide
+│   └── ARCHITECTURE.md             # Design decisions and why things work the way they do
 │
-├── langchain_agent/            # AI Deployment Agent (LangChain ReAct)
-│   ├── agent.py                # Main entry point (3 debugging levels)
-│   ├── tools.py                # DownloadBuild, TransferToServer, DeployOnServer, RestartServices
-│   ├── callbacks.py            # DeploymentAuditHandler, TokenUsageHandler,
-│   │                           # LoopDetectionHandler, SlackAlertHandler
-│   └── logs/                   # Created at runtime
+├── langchain_agent/                # AI Deployment Agent (LangChain ReAct)
+│   ├── agent.py                    # Main entry point (3 debugging levels)
+│   ├── callbacks.py                # DeploymentAuditHandler, TokenUsageHandler,
+│   │                               # LoopDetectionHandler, SlackAlertHandler, TeamsAlertHandler
+│   ├── config.json                 # Master toggle: handlers, log paths, alert provider
+│   ├── config_loader.py            # Reads config.json and builds active handler list
+│   ├── tools.py                    # DownloadBuild, TransferToServer, DeployOnServer, RestartServices
+│   └── logs/                       # Created at runtime
 │       ├── deployment_audit.log
 │       ├── token_usage.log
 │       ├── langchain_file_callback.log
 │       └── loop_detection.log
 │
-├── langgraph_agent/            # Document Review Agent (LangGraph State Machine)
-│   ├── runner.py               # Main entry point (4 debugging modes)
-│   ├── graph.py                # Graph definition, nodes, state, routing
-│   └── teams_alert.py          # Microsoft Teams Incoming Webhook integration
+├── langgraph_agent/                # Document Review Agent (LangGraph State Machine)
+│   ├── runner.py                   # Main entry point (4 debugging modes)
+│   ├── graph.py                    # Graph definition, nodes, state, routing
+│   └── teams_alert.py              # Microsoft Teams Incoming Webhook integration
 │
+├── LICENSE
 ├── requirements.txt
-├── .env.example                # Copy to .env and fill in your keys
+├── .env.example                    # Copy to .env and fill in your keys
 └── README.md
 ```
 
