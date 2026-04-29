@@ -6,7 +6,7 @@ Some context on why things are designed the way they are, for anyone who wants t
 
 ## Why three debugging levels instead of one
 
-When I first hit the looping problem with the deployment agent, my instinct was to turn on `verbose=True` and read the output. That works, but a 10-step agent run produces a few hundred lines of mixed text in the terminal. You can find the problem if you know what you are looking for, but you cannot grep it, you cannot share it, and it is gone the moment the terminal closes.
+When I first hit the looping problem with the deployment agent, my instinct was to turn on verbose=True and set_debug(True). They are related but different. verbose=True operates at the AgentExecutor level and shows the agent's thought process, tool calls, and observations in a readable format. set_debug(True) goes deeper and operates at the global LangChain level, printing the raw input and output of every internal component including ones you never directly interact with. Together they produce a few hundred lines of mixed text in the terminal. You can find the problem if you know what you are looking for, but you cannot grep it, you cannot share it, and it is gone the moment the terminal closes.
 
 `FileCallbackHandler` solves the persistence problem with zero custom code. But the format is still fixed. You get everything or nothing, and there is no way to add alerting when something specific goes wrong.
 
