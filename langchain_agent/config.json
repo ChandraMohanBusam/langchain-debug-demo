@@ -1,0 +1,46 @@
+{
+  "logging": {
+    "file_callback_handler": {
+      "enabled": true,
+      "output_file": "logs/langchain_file_callback.log",
+      "description": "LangChain built-in file logger. Writes formatted chain/LLM output to a file. No custom code needed. Good for quick persistent logging."
+    },
+    "audit_log": {
+      "enabled": true,
+      "output_file": "logs/deployment_audit.log",
+      "description": "Structured per-step audit trail. Logs every LLM prompt, response, tool call, tool output, agent action, and chain error."
+    },
+    "token_usage_log": {
+      "enabled": true,
+      "output_file": "logs/token_usage.log",
+      "description": "Tracks prompt, completion, and total tokens per LLM call. Disabled automatically if streaming=True (tokens not returned in stream mode)."
+    },
+    "loop_detection_log": {
+      "enabled": true,
+      "output_file": "logs/loop_detection.log",
+      "loop_threshold": 2,
+      "description": "Fires a warning when the same tool is called with identical input more than loop_threshold times. Escalates to the configured alert channel."
+    },
+    "log_level": "INFO",
+    "description": "Set to DEBUG for maximum verbosity, INFO for normal operation, WARNING for errors only."
+  },
+  "alerts": {
+    "provider": "slack",
+    "description": "Set provider to 'slack', 'teams', or 'none'. Controls which alert channel is activated at startup. No code change needed to switch channels.",
+    "notify_on": {
+      "llm_error": true,
+      "chain_error": true,
+      "tool_error": true,
+      "loop_detected": true,
+      "description": "Set individual flags to false to suppress specific alert types."
+    },
+    "slack": {
+      "webhook_url_env": "SLACK_WEBHOOK_URL",
+      "description": "Reads webhook URL from the environment variable named here. Set SLACK_WEBHOOK_URL in your .env file."
+    },
+    "teams": {
+      "webhook_url_env": "TEAMS_WEBHOOK_URL",
+      "description": "Reads webhook URL from the environment variable named here. Set TEAMS_WEBHOOK_URL in your .env file."
+    }
+  }
+}
