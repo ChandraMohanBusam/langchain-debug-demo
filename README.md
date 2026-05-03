@@ -53,6 +53,7 @@ langchain-debug-demo/
 ├── langgraph_agent/                # Document Review Agent (LangGraph State Machine)
 │   ├── runner.py                   # Main entry point (4 debugging modes)
 │   ├── graph.py                    # Graph definition, nodes, state, routing
+│   ├── langgraph.json              # LangGraph Studio configuration
 │   └── teams_alert.py              # Microsoft Teams Incoming Webhook integration
 │
 ├── LICENSE
