@@ -23,6 +23,7 @@ Design decisions and reasoning behind the three-level debugging approach, config
 | Checkpointer (MemorySaver) | N/A | Yes |
 | get_state() inspection | N/A | Yes |
 | Time Travel / State History | N/A | Yes |
+| LangGraph Studio (in-memory mode) | N/A | Yes |
 | Slack alerts | Yes | N/A |
 | Microsoft Teams alerts | N/A | Yes |
 
@@ -495,6 +496,141 @@ They are not alternatives. They are different layers of the same observability s
 | get_state_history() | All checkpoints, newest first | Find where loop started |
 | Time Travel (re-invoke with checkpoint config) | Replay from saved state | Test fix without full restart |
 | LangGraph Studio | Visual graph IDE with breakpoints | Complex multi-agent workflows |
+
+---
+
+## 9. LangGraph Studio Setup
+
+LangGraph Studio is a browser-based visual IDE for LangGraph graphs. It shows
+your graph as a live diagram, lets you step through node execution, inspect the
+full State object at each step, and edit State values mid-run to test fixes
+without restarting. It complements the code-level tools in this project: the
+checkpointer and Time Travel answer "what happened and why." Studio answers
+"show me the graph and let me interact with it."
+
+There are two ways to run it.
+
+### Option A: Without Docker (in-memory mode)
+
+The most accessible option for development and debugging sessions.
+No Docker required. State is held in memory for the duration of the session.
+
+**Step 1: Install the LangGraph CLI with in-memory support**
+
+```bash
+pip install -U "langgraph-cli[inmem]"
+```
+
+**Step 2: Create langgraph.json in your project root**
+
+LangGraph Studio requires a `langgraph.json` config file to find your graph,
+dependencies, and environment variables. Create this file in the
+`langgraph_agent/` directory:
+
+```json
+{
+  "dependencies": ["."],
+  "graphs": {
+    "agent": "./graph.py:graph"
+  },
+  "env": ".env"
+}
+```
+
+Config fields explained:
+
+| Field | What It Does |
+|---|---|
+| `dependencies` | Tells the CLI where to find your Python dependencies. `"."` means the current directory. |
+| `graphs` | Maps a name to your graph object. Format is `"./filename.py:variable_name"`. |
+| `env` | Path to your `.env` file so the dev server picks up your API keys automatically. |
+
+**Step 3: Start the dev server**
+
+```bash
+cd langgraph_agent
+langgraph dev
+```
+
+This starts a local server and opens LangGraph Studio in your browser
+automatically. You will see your graph diagram, node execution steps,
+and the full State object at each checkpoint.
+
+### Option B: With Docker (full mode)
+
+Provides persistent storage and the complete Studio experience across sessions.
+Requires Docker Desktop to be running.
+
+Follow the official setup guide:
+[https://langchain-ai.github.io/langgraph/concepts/langgraph_studio](https://langchain-ai.github.io/langgraph/concepts/langgraph_studio)
+
+---
+
+### Attaching a Python Debugger (debugpy)
+
+Studio gives you the graph-level view. Attaching debugpy gives you
+breakpoint-level visibility into the Python code running inside each node.
+Both together cover every layer of a LangGraph debugging session.
+
+**Step 1: Install debugpy**
+
+```bash
+pip install debugpy
+```
+
+**Step 2: Start the dev server with a debug port**
+
+```bash
+cd langgraph_agent
+langgraph dev --debug-port 5678
+```
+
+**Step 3: Attach from VS Code**
+
+Add this configuration to your `.vscode/launch.json`:
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Attach to LangGraph Dev Server",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 5678
+      },
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}",
+          "remoteRoot": "."
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Step 4: Set breakpoints and attach**
+
+1. Open `graph.py` in VS Code
+2. Set a breakpoint inside any node function (e.g., `classify_node` or `review_node`)
+3. Run the LangGraph dev server with `--debug-port 5678`
+4. In VS Code, go to Run and Debug, select "Attach to LangGraph Dev Server", click Start
+5. Trigger your graph by sending a request through Studio
+6. VS Code will pause at your breakpoint with full variable inspection
+
+### When to use Studio vs code-level debugging
+
+| Scenario | Best Tool |
+|---|---|
+| Understanding graph structure and flow | LangGraph Studio diagram |
+| Inspecting State values after each node | Studio State panel |
+| Editing State mid-run to test a fix | Studio State editor |
+| Breakpoint inside a node function | debugpy attached to dev server |
+| Finding which checkpoint caused a loop | get_state_history() in code |
+| Replaying from a saved checkpoint | Time Travel in code |
 
 ---
 
