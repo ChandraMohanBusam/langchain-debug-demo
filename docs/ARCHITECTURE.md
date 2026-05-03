@@ -47,3 +47,19 @@ One thing worth knowing: `on_llm_error` fires on every individual LLM call failu
 The deployment agent scenario is too specific for demonstrating LangGraph concepts cleanly. Deployment is intentionally sequential: download, transfer, deploy, restart. That is a straight line, not a graph.
 
 The document review scenario has a natural loop: classify, review, and if the reviewer requests changes, revise and go back to review. That loop is the reason LangGraph exists and the reason its debugging tools are different. A scenario without a loop would not show why `get_state_history()` matters, or why a revision counter in State is a better loop guard than a callback-level counter.
+
+---
+
+## LangGraph Studio: visual debugging alongside code-level tools
+
+LangGraph Studio is a browser-based visual IDE for LangGraph graphs. It shows your graph structure as a live diagram, lets you step through node execution, inspect the full State object at each step in a UI panel, and edit State values mid-run to test fixes without restarting. It complements the code-level tools in this project rather than replacing them. get_state_history() and Time Travel answer "what happened and why." Studio answers "show me the graph and let me poke at it."
+
+There are two ways to run it depending on your environment.
+
+**With Docker (full mode):** Requires Docker Desktop running. Provides persistent storage and the complete Studio experience. Follow the official LangGraph documentation for the Docker setup path.
+
+**Without Docker (in-memory mode):** The more accessible option for most development and debugging sessions. No Docker required. State is held in memory for the duration of the session.
+
+The in-memory mode is what most engineers should reach for first. The Docker path adds persistence but also adds friction. For debugging a loop or inspecting a State object during development, in-memory is sufficient.
+
+The debugpy attachment is worth knowing about separately. Studio gives you the graph-level view. debugpy gives you breakpoint-level visibility into the Python code running inside each node. Both together cover every layer of a LangGraph debugging session.
